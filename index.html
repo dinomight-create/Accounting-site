@@ -14,12 +14,14 @@
     --text-color: #202124;
     --text-muted: #5f6368;
     --green: #188038;
+    --red: #c5221f;
+    --amber: #e8710a;
     --cell-h: 32px;
   }
 
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; height: 100%; }
-  
+
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background: var(--bg-main);
@@ -30,7 +32,7 @@
     overflow: hidden;
   }
 
-  /* ============ APP HEADER ============ */
+  /* APP HEADER */
   .app-header {
     background: var(--card-bg);
     padding: 10px 16px;
@@ -38,12 +40,14 @@
     align-items: center;
     justify-content: space-between;
     flex-shrink: 0;
+    gap: 12px;
   }
 
   .app-brand {
     display: flex;
     align-items: center;
     gap: 10px;
+    min-width: 0;
   }
 
   .app-logo {
@@ -57,13 +61,50 @@
     justify-content: center;
     font-weight: bold;
     font-size: 13px;
+    flex-shrink: 0;
   }
 
   .app-title {
     font-size: 16px;
     font-weight: 600;
     margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .sync-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    color: var(--text-muted);
+    padding: 5px 10px;
+    border-radius: 12px;
+    background: #f1f3f4;
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+  }
+  .sync-pill:hover { background: #e8eaed; }
+  .sync-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #9aa0a6;
+    flex-shrink: 0;
+  }
+  .sync-pill.ok .sync-dot { background: var(--green); }
+  .sync-pill.syncing .sync-dot { background: var(--primary); animation: pulse 1s ease-in-out infinite; }
+  .sync-pill.error .sync-dot { background: var(--red); }
+  .sync-pill.offline .sync-dot { background: var(--amber); }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.35;} }
 
   .toast-pill {
     font-size: 11px;
@@ -77,8 +118,40 @@
     font-weight: 500;
   }
   .toast-pill.show { opacity: 1; }
+  .toast-pill.err { background: #fce8e6; color: var(--red); }
 
-  /* ============ TAB NAVIGATION (TOP PLACEMENT) ============ */
+  /* SYNC SETTINGS PANEL */
+  .sync-panel {
+    position: absolute;
+    top: 52px;
+    right: 16px;
+    width: 340px;
+    max-width: calc(100vw - 32px);
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.14);
+    padding: 16px;
+    z-index: 50;
+    display: none;
+  }
+  .sync-panel.open { display: block; }
+  .sync-panel h3 { margin: 0 0 8px; font-size: 13px; font-weight: 600; }
+  .sync-panel p { margin: 0 0 10px; font-size: 11.5px; color: var(--text-muted); line-height: 1.5; }
+  .sync-panel input {
+    width: 100%; border: 1px solid var(--border-color); border-radius: 5px;
+    padding: 8px 10px; font-size: 11.5px; font-family: monospace; outline: none; margin-bottom: 8px;
+  }
+  .sync-panel input:focus { border-color: var(--primary); }
+  .sync-panel-row { display: flex; gap: 8px; }
+  .sync-panel button { border: none; border-radius: 5px; padding: 7px 12px; font-size: 12px; cursor: pointer; }
+  .sync-panel button.primary { background: var(--primary); color: #fff; }
+  .sync-panel button.primary:hover { background: var(--primary-hover); }
+  .sync-panel button.ghost { background: #fff; border: 1px solid var(--border-color); color: var(--text-muted); }
+  .sync-panel-status { margin-top: 10px; font-size: 11px; color: var(--text-muted); padding-top: 10px; border-top: 1px solid var(--border-color); }
+  .sync-panel-status .row { display:flex; justify-content:space-between; padding:2px 0; }
+
+  /* TAB NAVIGATION */
   .tabstrip {
     display: flex;
     align-items: center;
@@ -91,12 +164,9 @@
     height: 40px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.03);
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; /* Hide scrollbar for clean mobile UI */
+    scrollbar-width: none;
   }
-
-  .tabstrip::-webkit-scrollbar {
-    display: none;
-  }
+  .tabstrip::-webkit-scrollbar { display: none; }
 
   .sheet-tab {
     padding: 0 12px;
@@ -112,7 +182,6 @@
     flex-shrink: 0;
     transition: all 0.2s;
   }
-
   .sheet-tab:hover { color: var(--primary); background: #f8f9fa; }
   .sheet-tab.active {
     color: var(--primary);
@@ -120,7 +189,7 @@
     background: #fff;
   }
 
-  /* ============ MAIN CONTENT AREA ============ */
+  /* MAIN CONTENT AREA */
   .main-content {
     flex: 1;
     display: flex;
@@ -129,7 +198,6 @@
     position: relative;
   }
 
-  /* ============ GRID / TABLE AREA ============ */
   .gridwrap {
     flex: 1;
     overflow: auto;
@@ -169,12 +237,9 @@
     position: sticky;
     left: 0; top: 0;
     z-index: 4;
-    width: 24px !important;
-    min-width: 24px !important;
-    max-width: 24px !important;
+    width: 24px !important; min-width: 24px !important; max-width: 24px !important;
   }
 
-  /* Compact row number indexing column */
   .row-num {
     background: #f1f3f4;
     color: var(--text-muted);
@@ -182,9 +247,7 @@
     position: sticky;
     left: 0;
     z-index: 2;
-    width: 24px !important;
-    min-width: 24px !important;
-    max-width: 24px !important;
+    width: 24px !important; min-width: 24px !important; max-width: 24px !important;
     padding: 0 !important;
     user-select: none;
     font-size: 10px;
@@ -195,234 +258,162 @@
     background: #fff;
     color: var(--text-color);
     cursor: pointer;
+    position: relative;
   }
-
   td.cell:focus {
     outline: 2px solid var(--primary);
     outline-offset: -2px;
     z-index: 1;
   }
-
   td.cell.num { text-align: right; font-variant-numeric: tabular-nums; }
   td.cell.hdr { font-weight: 600; background: #f8f9fa; }
   td.cell.readonly { color: var(--text-muted); background: #fafbfc; }
-  td.cell.added { background: #e6f4ea; transition: background 0.5s; }
-
-  /* ============ SEARCH PANEL STYLE ============ */
-  .search-panel {
-    padding: 16px;
-    max-width: 600px;
-    margin: 0 auto;
-    width: 100%;
+  td.cell.added { background: #e6f4ea; transition: background 1.4s; }
+  td.cell.remote-updated { background: #e8f0fe; transition: background 1.8s; }
+  td.cell.pushing::after {
+    content: ''; position: absolute; top: 3px; right: 3px;
+    width: 5px; height: 5px; border-radius: 50%; background: var(--primary);
+  }
+  td.cell.push-failed::after {
+    content: ''; position: absolute; top: 3px; right: 3px;
+    width: 5px; height: 5px; border-radius: 50%; background: var(--red);
   }
 
+  /* SEARCH PANEL STYLE */
+  .search-panel { padding: 16px; max-width: 600px; margin: 0 auto; width: 100%; }
   .search-panel label {
-    display: block;
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-bottom: 6px;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    font-weight: 600;
+    display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 6px;
+    text-transform: uppercase; letter-spacing: .04em; font-weight: 600;
   }
-
-  .search-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-
+  .search-row { display: flex; gap: 8px; margin-bottom: 16px; }
   .search-row input {
-    flex: 1;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    padding: 10px 12px;
-    font-size: 14px;
-    font-family: monospace;
-    outline: none;
-    background: #fff;
+    flex: 1; border: 1px solid var(--border-color); border-radius: 6px;
+    padding: 10px 12px; font-size: 14px; font-family: monospace; outline: none; background: #fff;
   }
-
-  .search-row input:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 1px var(--primary);
-  }
-
+  .search-row input:focus { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
   .search-row button {
-    background: var(--primary);
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 0 16px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
+    background: var(--primary); color: #fff; border: none; border-radius: 6px;
+    padding: 0 16px; font-size: 13px; font-weight: 500; cursor: pointer;
   }
-
   .search-row button:hover { background: var(--primary-hover); }
-
-  .search-result {
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    overflow: hidden;
-    background: #fff;
-  }
-
-  .search-result .row {
-    display: flex;
-    border-bottom: 1px solid var(--border-color);
-    font-size: 13px;
-  }
-
+  .search-result { border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; background: #fff; }
+  .search-result .row { display: flex; border-bottom: 1px solid var(--border-color); font-size: 13px; }
   .search-result .row:last-child { border-bottom: none; }
-
   .search-result .row .k {
-    width: 140px;
-    flex-shrink: 0;
-    padding: 9px 12px;
-    color: var(--text-muted);
-    background: #fafbfc;
-    border-right: 1px solid var(--border-color);
-    font-weight: 500;
+    width: 140px; flex-shrink: 0; padding: 9px 12px; color: var(--text-muted);
+    background: #fafbfc; border-right: 1px solid var(--border-color); font-weight: 500;
   }
-
-  .search-result .row .v {
-    padding: 9px 12px;
-    color: var(--text-color);
-    word-break: break-word;
-    flex: 1;
-  }
-
+  .search-result .row .v { padding: 9px 12px; color: var(--text-color); word-break: break-word; flex: 1; }
   .search-status { font-size: 13px; color: var(--text-muted); padding: 10px 0; }
-  .search-status.error { color: #c5221f; }
-
-  .bank-list {
-    max-height: 200px;
-    overflow-y: auto;
-    font-family: monospace;
-    font-size: 12px;
-  }
-
+  .search-status.error { color: var(--red); }
+  .bank-list { max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px; }
   .bank-list div { padding: 4px 0; border-bottom: 1px solid var(--border-color); }
   .bank-list div:last-child { border-bottom: none; }
 
-  .cors-note {
-    margin-top: 14px;
-    font-size: 11px;
-    color: var(--text-muted);
-    line-height: 1.4;
-    background: #fef7e0;
-    border: 1px solid #f9e5a0;
-    border-radius: 6px;
-    padding: 10px;
+  .load-state {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 10px; height: 100%; padding: 40px 20px; text-align: center;
+    color: var(--text-muted); font-size: 13px;
   }
+  .load-state p { margin: 0; max-width: 420px; line-height: 1.5; }
+  .load-state.error p strong { color: var(--red); }
+  .load-state button {
+    margin-top: 6px; background: var(--primary); color: #fff; border: none;
+    border-radius: 6px; padding: 8px 16px; font-size: 12.5px; cursor: pointer;
+  }
+  .load-state button:hover { background: var(--primary-hover); }
+  .load-spinner {
+    width: 26px; height: 26px; border: 3px solid #e0e0e0;
+    border-top-color: var(--primary); border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ============ ADVANCED MOBILE RESPONSIVENESS ============ */
   @media (max-width: 768px) {
     .app-header { padding: 8px 12px; }
     .app-title { font-size: 15px; }
-
     .search-panel { padding: 12px; }
     .search-row { flex-direction: column; }
-    .search-row input { height: 40px; }
-    .search-row button { height: 40px; width: 100%; }
-
+    .search-row input, .search-row button { height: 40px; width: 100%; }
     .search-result .row { flex-direction: column; }
     .search-result .row .k {
-      width: 100%;
-      background: #f1f3f4;
-      border-right: none;
-      border-bottom: 1px solid var(--border-color);
-      padding: 6px 10px;
-      font-size: 11px;
+      width: 100%; background: #f1f3f4; border-right: none;
+      border-bottom: 1px solid var(--border-color); padding: 6px 10px; font-size: 11px;
     }
     .search-result .row .v { padding: 8px 10px; font-size: 12px; }
-    
-    .sheet-tab {
-      padding: 0 10px;
-      font-size: 12px;
-    }
+    .sheet-tab { padding: 0 10px; font-size: 12px; }
+    .sync-panel { right: 8px; left: 8px; width: auto; }
   }
 </style>
 </head>
 <body>
 
-  <!-- App Header -->
   <header class="app-header">
     <div class="app-brand">
       <div class="app-logo">KG</div>
       <h1 class="app-title">System Księgowy 2026</h1>
     </div>
-    <span class="toast-pill" id="toastPill"></span>
+    <div class="header-right">
+      <span class="toast-pill" id="toastPill"></span>
+      <div class="sync-pill" id="syncPill"><span class="sync-dot"></span><span id="syncLabel">Łączenie…</span></div>
+    </div>
   </header>
 
-  <!-- Top Tab Navigation -->
+  <div class="sync-panel" id="syncPanel">
+    <h3>Synchronizacja z Arkuszem Google</h3>
+    <p>Adres wdrożonego Web Appa (Apps Script). Zapisy w tej aplikacji trafiają do Arkusza natychmiast; zmiany zrobione w Arkuszu pojawią się tutaj przy kolejnym odświeżeniu (~8 s).</p>
+    <input type="text" id="webAppUrlInput" placeholder="https://script.google.com/macros/s/…/exec">
+    <div class="sync-panel-row">
+      <button class="primary" id="syncSaveBtn">Zapisz i połącz</button>
+      <button class="ghost" id="syncNowBtn">Odśwież teraz</button>
+    </div>
+    <div class="sync-panel-status" id="syncPanelStatus"></div>
+  </div>
+
   <nav class="tabstrip" id="tabStrip"></nav>
 
-  <!-- Main Grid / Sheet Area -->
   <main class="main-content">
     <div class="gridwrap" id="gridWrap"></div>
   </main>
 
-<script id="raw-data" type="application/json">{"kpir": [["Roczne podsumowanie księgi przychodów i rozchodów", "", "", "", "", "", "", "", ""], ["", "", "", "", "", "", "", "", ""], ["Year", "", "", "", "", "", "", "", ""], ["Miesiąc", "Sprzedane towary i usługi", "Pozostałe przychody", "Przychód razem", "Zakup towarów i materiałów", "Koszty uboczne", "Koszty wynagrodzenia", "Pozostałe wydatki", "Koszty razem"], ["Inwentaryzacja fizyczna na początku roku", "1000", "", "", "300", "", "", "", ""], ["Styczeń", "7000", "150", "7150", "40000", "250", "1100", "750", "42100"], ["Łączny", "7000", "150", "7150", "40000", "250", "1100", "750", "42100"], ["Luty", "6000", "100", "6100", "0", "0", "1100", "200", "1300"], ["Łączny", "13000", "250", "13250", "40000", "250", "2200", "950", "43400"], ["marzec", "7000", "50", "7050", "0", "0", "1100", "150", "1250"], ["Łączny", "20000", "300", "20300", "40000", "250", "3300", "1100", "44650"], ["Kwiecień", "5000", "150", "5150", "300", "0", "1100", "100", "1200"], ["Łączny", "25000", "450", "25450", "40300", "250", "4400", "1200", "45850"], ["Móc", "6000", "100", "6100", "1000", "0", "1100", "100", "1200"], ["Łączny", "31000", "550", "31550", "41300", "250", "5500", "1300", "47050"], ["Czerwiec", "6000", "200", "6200", "500", "0", "1100", "100", "1200"], ["Łączny", "37000", "750", "37750", "41800", "250", "6600", "1400", "48250"], ["Lipiec", "7000", "150", "7150", "2000", "0", "1100", "100", "1200"], ["Łączny", "44000", "900", "44900", "43800", "250", "7700", "1500", "49450"], ["Sierpień", "5000", "100", "5100", "1000", "0", "1100", "100", "1200"], ["Łączny", "49000", "1000", "50000", "44800", "250", "8800", "1600", "50650"], ["Wrzesień", "6000", "250", "6250", "200", "100", "1100", "250", "1350"], ["Łączny", "55000", "1250", "56250", "45000", "350", "9900", "1850", "52000"], ["Październik", "5000", "200", "5200", "500", "50", "1100", "150", "1250"], ["Łączny", "60000", "1450", "61450", "45500", "400", "11000", "2000", "53250"], ["Listopad", "6000", "100", "6100", "2000", "50", "1100", "100", "1200"], ["Łączny", "66000", "1550", "67550", "47500", "450", "12100", "2100", "54450"], ["grudzień", "9000", "300", "9300", "0", "0", "1100", "100", "1200"], ["Łączny", "75000", "1850", "76850", "47500", "450", "13200", "2200", "55650"], ["Inwentaryzacja z natury na koniec roku", "-6500", "", "-6500", "9500", "", "", "", ""], ["TOTAL", "75000", "1850", "76850", "47500", "450", "13200", "2200", "55650"]], "masterlog": [["Name", "ID no.", "numer faktury", "kwota", "VAT ammount", "NIP", "bank acc.", "ksef no.", "seller", "data wystawienia faktury", "Miejsce wystawienia faktury", "rodzaj faktury"], ["", "", "", "", "", "", "", "", "", "", "", ""], ["Aria", "611098", "FV-20260717-223473", "9 658,56 zł", "0,00 zł", "100-000-48-95", "66158453238458207597540575", "KSeF-20260717-1XZTS7NC9K21RQ1F6EL0", "NetSoft", "2026-07-17", "Lublin", "obroty"], ["Kai", "205108", "FV-20260717-318473", "6 403,97 zł", "304,95 zł", "100-000-24-36", "66158843028348731310117253", "KSeF-20260717-H3GCOV9J7JG9OASNYVOE", "AppGlow Sp. z o.o.", "2026-07-17", "Gdańsk", "obroty"], ["Sila", "938935", "FV-20260717-243173", "5 254,03 zł", "389,19 zł", "100-000-59-89", "66158711497601830118405475", "KSeF-20260717-2UHNWCQ7XVR6NYEI9TVX", "CloudNine", "2026-07-17", "Lublin", "zakupy"], ["Clara", "514440", "FV-20260717-114824", "2 033,39 zł", "380,23 zł", "100-000-29-85", "66158316333340757423294199", "KSeF-20260717-N8BM92RHB2XWLWWC2OAE", "AppGlow Sp. z o.o.", "2026-07-17", "Gdańsk", "obroty"], ["Jhon", "776367", "FV-20260717-163856", "3 489,82 zł", "166,18 zł", "100-000-38-03", "66158458446699830945864623", "KSeF-20260717-FLSMEVK2A67I0ATP3D12", "WebCore Systems", "2026-07-17", "Kraków", "zakupy"], ["Elena", "704264", "FV-20260717-159804", "6 711,30 zł", "497,13 zł", "100-000-86-86", "66158380438250637650957850", "KSeF-20260717-JNZX7SHPQXCWTSAFX8CR", "SaiyaChess", "2026-07-17", "Kraków", "zakupy"], ["Valko", "260483", "FV-20260717-960175", "5 620,03 zł", "267,62 zł", "100-000-47-02", "66158583574960365559961295", "KSeF-20260717-LBLGZRV4X9Y7O2983LJG", "SaiyaChess", "2026-07-17", "Poznań", "obroty"], ["Zephyr", "921256", "FV-20260717-844455", "9 562,71 zł", "455,37 zł", "100-000-51-85", "66158094536302997718034810", "KSeF-20260717-V6WV8FE7X1WSRVTRNLH9", "AppGlow Sp. z o.o.", "2026-07-17", "Warszawa", "obroty"], ["Freya", "412700", "FV-20260717-517523", "2 471,91 zł", "117,71 zł", "100-000-96-97", "66158173731147361754258094", "KSeF-20260717-SBGJ41EUTM2JP88NDUY8", "NetSoft", "2026-07-17", "Warszawa", "obroty"], ["Victor", "666671", "FV-20260717-436539", "9 420,61 zł", "697,82 zł", "100-000-61-96", "66158371853761347747770926", "KSeF-20260717-N50VC8DDSUD6I0DDMTOP", "NetSoft", "2026-07-17", "Kraków", "obroty"], ["Dan", "606392", "FV-20260717-754248", "3 806,19 zł", "0,00 zł", "100-000-11-35", "66158268019444620026076450", "KSeF-20260717-ERKM8CIPDZTYRQG6779V", "WebCore Systems", "2026-07-17", "Kraków", "obroty"], ["Frab", "268507", "FV-20260717-936942", "1 179,91 zł", "220,63 zł", "100-000-87-52", "66158612517685204373282630", "KSeF-20260717-SU3JUNGBKU7OWZ9W4OUQ", "AppGlow Sp. z o.o.", "2026-07-17", "Gdańsk", "zakupy"], ["Ricky", "643850", "FV-20260717-780050", "9 735,72 zł", "0,00 zł", "100-000-18-62", "66158560819685420901479767", "KSeF-20260717-EV6OS88NXEQEG64QWSMK", "SaiyaChess", "2026-07-17", "Lublin", "obroty"], ["Julian", "555815", "FV-20260717-613447", "6 913,20 zł", "0,00 zł", "100-000-67-76", "66158540159456435678575596", "KSeF-20260717-G8XUSNCXNF8E3VT4HPNI", "NetSoft", "2026-07-17", "Warszawa", "zakupy"], ["Alexander", "218019", "FV-20260717-462337", "1 239,98 zł", "231,87 zł", "100-000-84-27", "66158814504961041226306861", "KSeF-20260717-7UCM16CH8P5AMGCP70II", "WebCore Systems", "2026-07-17", "Wrocław", "obroty"], ["Joe", "561783", "FV-20260717-629107", "9 431,40 zł", "449,11 zł", "100-000-59-14", "66158025344547068701317400", "KSeF-20260717-2QMV8K24VH01ZJ3L2RTF", "CloudNine", "2026-07-17", "Kraków", "obroty"], ["Mark", "160035", "FV-20260717-710077", "2 029,18 zł", "379,44 zł", "100-000-44-93", "66158074725717405860427099", "KSeF-20260717-5ZHHDLSW2DJO4R4TLBLR", "AppGlow Sp. z o.o.", "2026-07-17", "Warszawa", "obroty"], ["g", "740300", "FV-20260717-167064", "9 385,85 zł", "1 755,08 zł", "100-000-91-19", "66158942149763627839147190", "KSeF-20260717-L3EWJLBRWZK4UNHMRTUR", "WebCore Systems", "2026-07-17", "Lublin", "zakupy"], ["Scott", "879412", "FV-20260717-950440", "6 173,24 zł", "0,00 zł", "100-000-08-39", "66158127974746978886172374", "KSeF-20260717-PGVVI4T0R1CGK7P5O04U", "NetSoft", "2026-07-17", "Kraków", "zakupy"], ["Lolo", "439510", "FV-20260717-693708", "3 349,88 zł", "248,14 zł", "100-001-01-34", "66158502797668808541142435", "KSeF-20260717-62VEU4JWJ5I0SEHPDIQX", "WebCore Systems", "2026-07-17", "Wrocław", "obroty"], ["Dum", "402443", "FV-20260717-667573", "4 645,96 zł", "221,24 zł", "100-000-60-78", "66158611645672094646696718", "KSeF-20260717-XSCOVKWUXPDSSMMJGZA7", "CloudNine", "2026-07-17", "Warszawa", "obroty"], ["Num", "896561", "FV-20260717-451776", "8 611,12 zł", "637,86 zł", "100-000-53-28", "66158123607318344576715178", "KSeF-20260717-F3YR733GJWDOT340QIC1", "SaiyaChess", "2026-07-17", "Wrocław", "obroty"], ["Brah", "760093", "FV-20260717-223470", "1 579,99 zł", "", "100-000-94-96", "66158057418103593958093876", "KSeF-20260720-UQYNBPEOMFPC7RVJRJU4", "CloudNine", "2026-07-20", "Kraków", "obroty"], ["", "", "", "", "", "", "", "", "", "", "", ""], ["", "", "", "", "", "", "", "", "", "", "", ""], ["", "", "", "", "", "", "", "", "", "", "", ""], ["", "", "", "", "", "", "", "", "", "", "", ""]], "faktury_kosztowe": [["", "Numer Faktury", "kwota"], ["Sila", "FV-20260717-243173", "5 254,03 zł"], ["Jhon", "FV-20260717-163856", "3 489,82 zł"], ["Elena", "FV-20260717-159804", "6 711,30 zł"], ["Frab", "FV-20260717-936942", "1 179,91 zł"], ["Julian", "FV-20260717-613447", "6 913,20 zł"], ["g", "FV-20260717-167064", "9 385,85 zł"], ["Scott", "FV-20260717-950440", "6 173,24 zł"]], "faktury_sprzedazowe": [["Name", "Numer Faktury", "kwota"], ["Aria", "FV-20260717-223473", "9 658,56 zł"], ["Kai", "FV-20260717-318473", "6 403,97 zł"], ["Clara", "FV-20260717-114824", "2 033,39 zł"], ["Valko", "FV-20260717-960175", "5 620,03 zł"], ["Zephyr", "FV-20260717-844455", "9 562,71 zł"], ["Freya", "FV-20260717-517523", "2 471,91 zł"], ["Victor", "FV-20260717-436539", "9 420,61 zł"], ["Dan", "FV-20260717-754248", "3 806,19 zł"], ["Ricky", "FV-20260717-780050", "9 735,72 zł"], ["Alexander", "FV-20260717-462337", "1 239,98 zł"], ["Joe", "FV-20260717-629107", "9 431,40 zł"], ["Mark", "FV-20260717-710077", "2 029,18 zł"], ["Lolo", "FV-20260717-693708", "3 349,88 zł"], ["Dum", "FV-20260717-667573", "4 645,96 zł"], ["Num", "FV-20260717-451776", "8 611,12 zł"], ["Brah", "FV-20260717-223470", "1 579,99 zł"]], "zestawienie": [["numer faktury kosztowej", "kwota", "", "numer faktury sprzedażowej", "kwota", "", "SUMA"], ["FV-20260717-243173", "5 254,03 zł", "", "FV-20260717-223473", "9 658,56 zł", "", "4 404,53 zł"], ["FV-20260717-163856", "3 489,82 zł", "", "FV-20260717-318473", "6 403,97 zł", "", "2 914,15 zł"], ["FV-20260717-159804", "6 711,30 zł", "", "FV-20260717-114824", "2 033,39 zł", "", "-4 677,91 zł"], ["FV-20260717-936942", "1 179,91 zł", "", "FV-20260717-960175", "5 620,03 zł", "", "4 440,12 zł"], ["FV-20260717-613447", "6 913,20 zł", "", "FV-20260717-844455", "9 562,71 zł", "", "2 649,51 zł"], ["FV-20260717-167064", "9 385,85 zł", "", "FV-20260717-517523", "2 471,91 zł", "", "-6 913,94 zł"], ["FV-20260717-950440", "6 173,24 zł", "", "FV-20260717-436539", "9 420,61 zł", "", "3 247,37 zł"], ["", "", "", "FV-20260717-754248", "3 806,19 zł", "", "3 806,19 zł"], ["", "", "", "FV-20260717-780050", "9 735,72 zł", "", "9 735,72 zł"], ["", "", "", "FV-20260717-462337", "1 239,98 zł", "", "1 239,98 zł"], ["", "", "", "FV-20260717-629107", "9 431,40 zł", "", "9 431,40 zł"], ["", "", "", "FV-20260717-710077", "2 029,18 zł", "", "2 029,18 zł"], ["", "", "", "FV-20260717-693708", "3 349,88 zł", "", "3 349,88 zł"], ["", "", "", "FV-20260717-667573", "4 645,96 zł", "", "4 645,96 zł"], ["", "", "", "FV-20260717-451776", "8 611,12 zł", "", "8 611,12 zł"], ["", "", "", "FV-20260717-223470", "1 579,99 zł", "", "1 579,99 zł"], ["", "", "", "", "", "", "0"], ["", "", "", "", "", "", "0"], ["", "", "", "", "", "", "0"], ["", "", "", "", "", "", "0"], ["", "", "", "", "", "", "0"], ["", "", "", "", "", "", "0"], ["", "", "", "", "", "", "0"], ["", "", "", "", "", "", "0"], ["", "", "", "", "", "", "0"], ["", "", "", "", "", "", "0"]], "search": [["search:", "5252674798"], ["", ""], ["", ""], ["Nazwa Firmy:", "ALLEGRO SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ"], ["Adres:", "WIERZBIĘCICE 1B, 61-569 POZNAŃ"], ["Status VAT:", "Czynny"], ["REGON:", "365331553"], ["KRS:", "635012"], ["Zgłoszone Konta Bankowe:", ""], ["", "98114011240000516508001059"], ["", "06105000861000009151667632"]], "vat": [["Rozliczenie VAT", "Invoice no.", "Kwota brutto", "kwota VAT", "kwota netto"], ["0% (stawka zerowa)", "FV-20260717-223473", "9 658,56 zł", "0,00 zł", "9 658,56 zł"], ["5%  (stawka obniżona)", "FV-20260717-318473", "6 403,97 zł", "304,95 zł", "6 099,02 zł"], ["8% (stawka obniżona)", "FV-20260717-243173", "5 254,03 zł", "389,19 zł", "4 864,84 zł"], ["23% (stawka podstawowa)", "FV-20260717-114824", "2 033,39 zł", "380,23 zł", "1 653,16 zł"], ["5% (stawka obniżona)", "FV-20260717-163856", "3 489,82 zł", "166,18 zł", "3 323,64 zł"], ["8% (stawka obniżona)", "FV-20260717-159804", "6 711,30 zł", "497,13 zł", "6 214,17 zł"], ["5% (stawka obniżona)", "FV-20260717-960175", "5 620,03 zł", "267,62 zł", "5 352,41 zł"], ["5% (stawka obniżona)", "FV-20260717-844455", "9 562,71 zł", "455,37 zł", "9 107,34 zł"], ["5% (stawka obniżona)", "FV-20260717-517523", "2 471,91 zł", "117,71 zł", "2 354,20 zł"], ["8% (stawka obniżona)", "FV-20260717-436539", "9 420,61 zł", "697,82 zł", "8 722,79 zł"], ["NP", "FV-20260717-754248", "3 806,19 zł", "0,00 zł", "3 806,19 zł"], ["23% (stawka podstawowa)", "FV-20260717-936942", "1 179,91 zł", "220,63 zł", "959,28 zł"], ["NP", "FV-20260717-780050", "9 735,72 zł", "0,00 zł", "9 735,72 zł"], ["NP", "FV-20260717-613447", "6 913,20 zł", "0,00 zł", "6 913,20 zł"], ["23% (stawka podstawowa)", "FV-20260717-462337", "1 239,98 zł", "231,87 zł", "1 008,11 zł"], ["5% (stawka obniżona)", "FV-20260717-629107", "9 431,40 zł", "449,11 zł", "8 982,29 zł"], ["23% (stawka podstawowa)", "FV-20260717-710077", "2 029,18 zł", "379,44 zł", "1 649,74 zł"], ["23% (stawka podstawowa)", "FV-20260717-167064", "9 385,85 zł", "1 755,08 zł", "7 630,77 zł"], ["0% (stawka zerowa)", "FV-20260717-950440", "6 173,24 zł", "0,00 zł", "6 173,24 zł"], ["8% (stawka obniżona)", "FV-20260717-693708", "3 349,88 zł", "248,14 zł", "3 101,74 zł"], ["5% (stawka obniżona)", "FV-20260717-667573", "4 645,96 zł", "221,24 zł", "4 424,72 zł"], ["8% (stawka obniżona)", "FV-20260717-451776", "8 611,12 zł", "637,86 zł", "7 973,26 zł"], ["", "FV-20260717-223470", "1 579,99 zł", "", ""], ["", "", "", "", ""], ["", "", "", "", ""], ["", "", "", "", ""], ["", "", "", "", ""], ["", "", "", "", ""], ["", "", "", "", ""]]}</script>
 <script>
-const RAW = JSON.parse(document.getElementById('raw-data').textContent);
+/* CLOUD SYNC CONFIGURATION */
+const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyILoBUwmbiaSV0VKVP2-SEtXbhOZi4iIjUG-AQJaUL8Z4JlHUPoG6FEQhC_UWm2EY0/exec';
+const WEBAPP_STORAGE_KEY = 'ksiega:webAppUrl';
+
+function getWebAppUrl(){
+  try{ return localStorage.getItem(WEBAPP_STORAGE_KEY) || DEFAULT_WEB_APP_URL; }catch(e){ return DEFAULT_WEB_APP_URL; }
+}
+function setWebAppUrl(url){
+  try{ localStorage.setItem(WEBAPP_STORAGE_KEY, url); }catch(e){ /* ignore */ }
+}
+let WEB_APP_URL = getWebAppUrl();
+
+const SHEET_NAMES = {
+  kpir: 'KPiR',
+  masterlog: 'MasterLog',
+  vat: 'Rozliczenie VAT',
+  kosztowe: 'Faktury_kosztowe',
+  sprzedazowe: 'Faktury_sprzedażowe',
+};
 
 const SHEETS = [
-  {
-    key:'kpir', tab:'KPiR',
-    widths:[200,150,140,120,170,120,150,130,120],
-    data: RAW.kpir.map(r=>r.slice()),
-    extraBlank:0,
-    numericFrom:1,
-  },
-  {
-    key:'masterlog', tab:'MasterLog',
-    widths:[90,80,150,100,100,120,190,220,150,110,140,110],
-    data: RAW.masterlog.map(r=>r.slice()),
-    extraBlank:14,
-    headerRow:0,
-  },
-  {
-    key:'vat', tab:'Rozliczenie VAT',
-    widths:[180,160,120,120,120],
-    data: RAW.vat.map(r=>r.slice()),
-    extraBlank:20,
-    headerRow:0,
-  },
-  {
-    key:'search', tab:'Wyszukiwarka NIP', special:'search',
-  },
-  {
-    key:'kosztowe', tab:'Faktury kosztowe',
-    widths:[110,180,120],
-    data: RAW.faktury_kosztowe.map(r=>r.slice()),
-    extraBlank:6,
-    headerRow:0,
-  },
-  {
-    key:'sprzedazowe', tab:'Faktury sprzedażowe',
-    widths:[110,180,120],
-    data: RAW.faktury_sprzedazowe.map(r=>r.slice()),
-    extraBlank:6,
-    headerRow:0,
-  },
-  {
-    key:'zestawienie', tab:'Zestawienie',
-    widths:[180,110,20,180,110,20,130],
-    data: RAW.zestawienie.map(r=>r.slice()),
-    extraBlank:8,
-    headerRow:0,
-  },
+  { key:'kpir', tab:'KPiR', widths:[200,150,140,120,170,120,150,130,120], data: [], extraBlank:10 },
+  { key:'masterlog', tab:'MasterLog', widths:[90,80,150,100,100,120,190,220,150,110,140,110], data: [], extraBlank:14 },
+  { key:'vat', tab:'Rozliczenie VAT', widths:[180,160,120,120,120], data: [], extraBlank:20 },
+  { key:'search', tab:'Wyszukiwarka NIP', special:'search' },
+  { key:'kosztowe', tab:'Faktury kosztowe', widths:[110,180,120], data: [], extraBlank:10 },
+  { key:'sprzedazowe', tab:'Faktury sprzedażowe', widths:[110,180,120], data: [], extraBlank:10 },
 ];
 
 const byKey = {};
 SHEETS.forEach(s=> byKey[s.key]=s);
 let activeKey = 'masterlog';
+let hasLoadedOnce = false;
+let initialLoadFailed = false;
 
 function colLetter(n){
-  let s='';
-  n++;
+  let s=''; n++;
   while(n>0){
     const m=(n-1)%26;
     s = String.fromCharCode(65+m)+s;
@@ -431,34 +422,153 @@ function colLetter(n){
   return s;
 }
 
-function padRows(sheet){
-  const width = sheet.widths.length;
-  const target = sheet.data.length + sheet.extraBlank;
+function padRows(sheet, baseLength){
+  const width = sheet.widths ? sheet.widths.length : 0;
+  if (!width) return;
+  const target = baseLength + (sheet.extraBlank || 5);
   while(sheet.data.length < target){
     sheet.data.push(new Array(width).fill(''));
   }
 }
-SHEETS.forEach(s=>{ if(s.data) padRows(s); });
 
-function fmtPLN(n){
-  if(n===null||n===undefined||n==='') return '';
-  const num = typeof n==='number' ? n : parseFloat(String(n).replace(/[^\d,.-]/g,'').replace(',','.'));
-  if(isNaN(num)) return '';
-  const neg = num < 0;
-  const [intPart, decPart] = Math.abs(num).toFixed(2).split('.');
-  const grouped = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '\u00A0');
-  return (neg ? '-' : '') + grouped + ',' + decPart + ' zł';
+function escapeHtml(s){
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-function parsePLN(s){
-  if(!s) return null;
-  const cleaned = String(s).replace(/[^\d,.-]/g,'').replace(/\s/g,'').replace(',','.');
-  const num = parseFloat(cleaned);
-  return isNaN(num) ? null : num;
+function showToast(msg, isErr){
+  const el = document.getElementById('toastPill');
+  el.textContent = msg;
+  el.classList.toggle('err', !!isErr);
+  el.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=> el.classList.remove('show'), 3000);
 }
 
-function todayISO(){ return new Date().toISOString().slice(0,10); }
+/* CLOUD API IO */
+async function cloudFetchSheet(name){
+  const url = `${WEB_APP_URL}?action=sheet&name=${encodeURIComponent(name)}`;
+  const resp = await fetch(url);
+  if(!resp.ok) throw new Error('HTTP '+resp.status);
+  return await resp.json();
+}
 
+async function cloudFetchNip(nip){
+  const url = `${WEB_APP_URL}?action=nip&nip=${encodeURIComponent(nip)}`;
+  const resp = await fetch(url);
+  if(!resp.ok) throw new Error('HTTP '+resp.status);
+  return await resp.json();
+}
+
+async function cloudWriteCell(sheetName, row1, col1, value){
+  const resp = await fetch(WEB_APP_URL, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify({sheet:sheetName, row:row1, column:col1, value})
+  });
+  if(!resp.ok) throw new Error('HTTP '+resp.status);
+  return await resp.json().catch(()=>({}));
+}
+
+function cellHasFocus(key, row, col){
+  const el = document.activeElement;
+  return el && el.classList && el.classList.contains('cell')
+    && activeKey===key && +el.dataset.row===row && +el.dataset.col===col;
+}
+
+async function loadSheetFromCloud(key){
+  const name = SHEET_NAMES[key];
+  if(!name) return;
+  const rows = await cloudFetchSheet(name);
+  if(!Array.isArray(rows)) return;
+  
+  const sheet = byKey[key];
+  const width = sheet.widths.length;
+  const changedCells = [];
+
+  for(let r=0; r<Math.max(rows.length, sheet.data.length); r++){
+    if(!sheet.data[r]) sheet.data[r] = new Array(width).fill('');
+    const incomingRow = rows[r] || [];
+    for(let c=0; c<width; c++){
+      if(cellHasFocus(key, r, c)) continue;
+      const newVal = incomingRow[c] !== undefined && incomingRow[c] !== null ? String(incomingRow[c]) : '';
+      if(sheet.data[r][c] !== newVal){
+        sheet.data[r][c] = newVal;
+        changedCells.push([r,c]);
+      }
+    }
+  }
+  padRows(sheet, rows.length);
+  return changedCells;
+}
+
+let isSyncing = false;
+async function syncAllFromCloud(showSpinner){
+  if(isSyncing || !WEB_APP_URL) return;
+  isSyncing = true;
+  if(showSpinner) setSyncStatus('syncing', 'Synchronizacja…');
+  try{
+    const keys = Object.keys(SHEET_NAMES);
+    let anyChanged = false;
+    for(const key of keys){
+      const changed = await loadSheetFromCloud(key);
+      if(changed && changed.length){
+        anyChanged = true;
+        if(key===activeKey) flagRemoteChanges(changed);
+      }
+    }
+    setSyncStatus('ok', 'Połączono · ' + new Date().toLocaleTimeString('pl-PL'));
+    initialLoadFailed = false;
+    const wasFirstLoad = !hasLoadedOnce;
+    hasLoadedOnce = true;
+    if((wasFirstLoad || anyChanged) && activeKey!=='search') renderGrid();
+  }catch(err){
+    setSyncStatus('error', 'Błąd połączenia');
+    if(!hasLoadedOnce){ initialLoadFailed = true; renderGrid(); }
+  }finally{
+    isSyncing = false;
+  }
+}
+
+function flagRemoteChanges(cells){
+  requestAnimationFrame(()=>{
+    cells.forEach(([r,c])=>{
+      const td = document.querySelector(`#gridWrap td.cell[data-row="${r}"][data-col="${c}"]`);
+      if(td){
+        td.classList.add('remote-updated');
+        setTimeout(()=> td.classList.remove('remote-updated'), 1800);
+      }
+    });
+  });
+}
+
+function setSyncStatus(state, label){
+  const pill = document.getElementById('syncPill');
+  pill.className = 'sync-pill ' + state;
+  document.getElementById('syncLabel').textContent = label;
+  const statusBox = document.getElementById('syncPanelStatus');
+  if(statusBox){
+    statusBox.innerHTML = `
+      <div class="row"><span>Status</span><span>${escapeHtml(label)}</span></div>
+      <div class="row"><span>Adres URL</span><span>${WEB_APP_URL ? '…' + escapeHtml(WEB_APP_URL.slice(-14)) : 'Nieustawiony'}</span></div>`;
+  }
+}
+
+async function pushCell(key, row, col, displayValue){
+  const name = SHEET_NAMES[key];
+  if(!name) return;
+  const td = document.querySelector(`#gridWrap td.cell[data-row="${row}"][data-col="${col}"]`);
+  if(td){ td.classList.remove('push-failed'); td.classList.add('pushing'); }
+  try{
+    await cloudWriteCell(name, row+1, col+1, displayValue);
+    if(td){ td.classList.remove('pushing'); }
+    setTimeout(()=> syncAllFromCloud(false), 800);
+  }catch(err){
+    if(td){ td.classList.remove('pushing'); td.classList.add('push-failed'); td.title='Nie udało się zapisać'; }
+    showToast('Błąd zapisu do Arkusza Google.', true);
+  }
+}
+
+/* RENDER GRID */
 function renderGrid(){
   const wrap = document.getElementById('gridWrap');
   const sheet = byKey[activeKey];
@@ -466,6 +576,15 @@ function renderGrid(){
   if(sheet.special==='search'){
     wrap.innerHTML = buildSearchPanelHTML();
     initSearchPanel();
+    return;
+  }
+
+  if(!hasLoadedOnce){
+    wrap.innerHTML = initialLoadFailed ? buildLoadErrorHTML() : buildLoadingHTML();
+    if(initialLoadFailed){
+      const retryBtn = document.getElementById('retryLoadBtn');
+      if(retryBtn) retryBtn.addEventListener('click', ()=> syncAllFromCloud(true));
+    }
     return;
   }
 
@@ -480,12 +599,10 @@ function renderGrid(){
     html += `<tr><th class="row-num">${r+1}</th>`;
     for(let c=0;c<cols;c++){
       const val = row[c] ?? '';
-      const isHeaderRow = sheet.headerRow===0 && r===0;
-      const numeric = looksNumericColumn(sheet, c, r);
+      const isHeaderRow = (r===0);
       const cls = ['cell'];
       if(isHeaderRow) cls.push('hdr');
-      if(numeric) cls.push('num');
-      html += `<td class="${cls.join(' ')}" contenteditable="true" spellcheck="false"
+      html += `<td class="${cls.join(' ')}" contenteditable="${isHeaderRow?'false':'true'}" spellcheck="false"
                    data-row="${r}" data-col="${c}">${escapeHtml(val)}</td>`;
     }
     html += '</tr>';
@@ -497,28 +614,18 @@ function renderGrid(){
     td.addEventListener('blur', onCellBlur);
     td.addEventListener('keydown', onCellKeydown);
   });
-
-  if(sheet.key==='zestawienie') styleZestSpacerCols();
 }
 
-function looksNumericColumn(sheet, colIdx, rowIdx){
-  if(sheet.key==='kpir') return colIdx>=1;
-  if(sheet.key==='masterlog') return colIdx===3 || colIdx===4;
-  if(sheet.key==='vat') return colIdx===2 || colIdx===3 || colIdx===4;
-  if(sheet.key==='kosztowe' || sheet.key==='sprzedazowe') return colIdx===2;
-  if(sheet.key==='zestawienie') return colIdx===1 || colIdx===4 || colIdx===6;
-  return false;
+function buildLoadingHTML(){
+  return `<div class="load-state"><div class="load-spinner"></div><p>Pobieranie danych z Arkusza Google…</p></div>`;
 }
-
-function styleZestSpacerCols(){
-  document.querySelectorAll('#gridWrap td.cell[data-col="2"], #gridWrap td.cell[data-col="5"]').forEach(td=>{
-    td.classList.add('readonly');
-    td.contentEditable = 'false';
-  });
-}
-
-function escapeHtml(s){
-  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function buildLoadErrorHTML(){
+  return `
+    <div class="load-state error">
+      <p><strong>Nie udało się pobrać danych z Arkusza Google.</strong></p>
+      <p>Wprowadź poprawny Web App URL w panelu synchronizacji.</p>
+      <button id="retryLoadBtn">Spróbuj ponownie</button>
+    </div>`;
 }
 
 function onCellKeydown(e){
@@ -539,16 +646,7 @@ function onCellKeydown(e){
 
 function focusCell(row,col){
   const td = document.querySelector(`#gridWrap td.cell[data-row="${row}"][data-col="${col}"]`);
-  if(td){ td.focus(); placeCaretAtEnd(td); }
-}
-
-function placeCaretAtEnd(el){
-  const range = document.createRange();
-  range.selectNodeContents(el);
-  range.collapse(false);
-  const sel = window.getSelection();
-  sel.removeAllRanges();
-  sel.addRange(range);
+  if(td){ td.focus(); }
 }
 
 function onCellBlur(e){
@@ -556,55 +654,32 @@ function onCellBlur(e){
   const row = +td.dataset.row, col = +td.dataset.col;
   const sheet = byKey[activeKey];
   const newVal = td.textContent.trim();
+  const oldVal = sheet.data[row][col];
+  if(newVal === oldVal) return;
   sheet.data[row][col] = newVal;
+  pushCell(activeKey, row, col, newVal);
 }
 
-/* ============================================================
-   SEARCH PANEL LOGIC
-   ============================================================ */
+/* SEARCH PANEL */
 function buildSearchPanelHTML(){
   return `
     <div class="search-panel">
       <label>Wyszukaj NIP w Białej Liście (Ministerstwo Finansów)</label>
       <div class="search-row">
-        <input type="text" id="nipInput" placeholder="np. 5252674798" value="${escapeHtml(RAW.search[0][1]||'')}">
+        <input type="text" id="nipInput" placeholder="np. 5252674798" value="">
         <button id="nipSearchBtn">Szukaj</button>
       </div>
       <div id="searchResults"></div>
-    </div>
-  `;
+    </div>`;
 }
 
 function initSearchPanel(){
   const btn = document.getElementById('nipSearchBtn');
   const input = document.getElementById('nipInput');
-  btn.addEventListener('click', ()=> runNipSearch(input.value));
-  input.addEventListener('keydown', e=>{ if(e.key==='Enter') runNipSearch(input.value); });
-  renderPreloadedSearch();
-}
-
-function renderPreloadedSearch(){
-  const rows = RAW.search;
-  const results = document.getElementById('searchResults');
-  const nazwa = rows[3] ? rows[3][1] : '';
-  if(!nazwa){ results.innerHTML=''; return; }
-  const adres = rows[4][1], statusVat = rows[5][1], regon = rows[6][1], krs = rows[7][1];
-  const accounts = rows.slice(9).map(r=>r[1]).filter(Boolean);
-  results.innerHTML = renderResultBlock({nazwa, adres, statusVat, regon, krs, accounts});
-}
-
-function renderResultBlock({nazwa, adres, statusVat, regon, krs, accounts}){
-  return `
-    <div class="search-result">
-      <div class="row"><div class="k">Nazwa Firmy:</div><div class="v">${escapeHtml(nazwa)}</div></div>
-      <div class="row"><div class="k">Adres:</div><div class="v">${escapeHtml(adres)}</div></div>
-      <div class="row"><div class="k">Status VAT:</div><div class="v">${escapeHtml(statusVat)}</div></div>
-      <div class="row"><div class="k">REGON:</div><div class="v">${escapeHtml(regon)}</div></div>
-      <div class="row"><div class="k">KRS:</div><div class="v">${escapeHtml(krs)}</div></div>
-      <div class="row"><div class="k">Zgłoszone konta:</div><div class="v">
-        ${accounts.length ? `<div class="bank-list">${accounts.map(a=>`<div>${escapeHtml(a)}</div>`).join('')}</div>` : 'Brak kont na Białej Liście'}
-      </div></div>
-    </div>`;
+  if(btn && input){
+    btn.addEventListener('click', ()=> runNipSearch(input.value));
+    input.addEventListener('keydown', e=>{ if(e.key==='Enter') runNipSearch(input.value); });
+  }
 }
 
 async function runNipSearch(rawNip){
@@ -616,32 +691,35 @@ async function runNipSearch(rawNip){
     return;
   }
   results.innerHTML = `<p class="search-status">Pobieranie danych z Ministerstwa Finansów…</p>`;
-  const today = todayISO();
-  const url = `https://wl-api.mf.gov.pl/api/search/nip/${nip}?date=${today}`;
   try{
-    const resp = await fetch(url);
-    const json = await resp.json();
-    if(resp.ok && json.result && json.result.subject){
+    const json = await cloudFetchNip(nip);
+    if(json && json.error){
+      results.innerHTML = `<p class="search-status error">${escapeHtml(json.message || 'Błąd wyszukiwania.')}</p>`;
+      return;
+    }
+    if(json.result && json.result.subject){
       const s = json.result.subject;
       const accounts = (s.accountNumbers||[]);
-      results.innerHTML = renderResultBlock({
-        nazwa: s.name || 'Brak danych',
-        adres: s.workingAddress || s.residenceAddress || 'Brak danych',
-        statusVat: s.statusVat || 'Brak danych',
-        regon: s.regon || 'Brak danych',
-        krs: s.krs || 'Brak danych',
-        accounts
-      });
+      results.innerHTML = `
+        <div class="search-result">
+          <div class="row"><div class="k">Nazwa Firmy:</div><div class="v">${escapeHtml(s.name || 'Brak danych')}</div></div>
+          <div class="row"><div class="k">Adres:</div><div class="v">${escapeHtml(s.workingAddress || s.residenceAddress || 'Brak danych')}</div></div>
+          <div class="row"><div class="k">Status VAT:</div><div class="v">${escapeHtml(s.statusVat || 'Brak danych')}</div></div>
+          <div class="row"><div class="k">REGON:</div><div class="v">${escapeHtml(s.regon || 'Brak danych')}</div></div>
+          <div class="row"><div class="k">KRS:</div><div class="v">${escapeHtml(s.krs || 'Brak danych')}</div></div>
+          <div class="row"><div class="k">Zgłoszone konta:</div><div class="v">
+            ${accounts.length ? `<div class="bank-list">${accounts.map(a=>`<div>${escapeHtml(a)}</div>`).join('')}</div>` : 'Brak kont na Białej Liście'}
+          </div></div>
+        </div>`;
     } else {
       results.innerHTML = `<p class="search-status error">${escapeHtml((json && json.message) ? 'Odpowiedź MF: '+json.message : 'Nie znaleziono podmiotu o podanym NIP w bazie MF.')}</p>`;
     }
   }catch(err){
-    results.innerHTML = `
-      <p class="search-status error">Błąd połączenia z API Ministerstwa Finansów.</p>
-      <div class="cors-note">Zapytania bezpośrednie mogą być blokowane przez CORS. Możesz sprawdzić NIP na <a href="https://www.podatki.gov.pl/wykaz-podatnikow-vat-wyszukiwarka" target="_blank" rel="noopener">stronie Wykazu Podatników VAT</a>.</div>`;
+    results.innerHTML = `<p class="search-status error">Nie udało się połączyć z Apps Script API.</p>`;
   }
 }
 
+/* TAB STRIP */
 function renderTabs(){
   const strip = document.getElementById('tabStrip');
   strip.innerHTML = SHEETS.map(s=>`<div class="sheet-tab ${s.key===activeKey?'active':''}" data-key="${s.key}">${escapeHtml(s.tab)}</div>`).join('');
@@ -654,8 +732,33 @@ function renderTabs(){
   });
 }
 
+/* SETTINGS & INIT */
+function initSyncUI(){
+  const pill = document.getElementById('syncPill');
+  const panel = document.getElementById('syncPanel');
+  const input = document.getElementById('webAppUrlInput');
+  input.value = WEB_APP_URL;
+
+  pill.addEventListener('click', ()=> panel.classList.toggle('open'));
+  document.addEventListener('click', e=>{
+    if(!panel.contains(e.target) && !pill.contains(e.target)) panel.classList.remove('open');
+  });
+  document.getElementById('syncSaveBtn').addEventListener('click', ()=>{
+    const val = input.value.trim();
+    if(!val){ showToast('Podaj adres URL Web Appa.', true); return; }
+    WEB_APP_URL = val;
+    setWebAppUrl(val);
+    showToast('Zapisano adres. Łączenie…');
+    syncAllFromCloud(true);
+  });
+  document.getElementById('syncNowBtn').addEventListener('click', ()=> syncAllFromCloud(true));
+}
+
 renderTabs();
 renderGrid();
+initSyncUI();
+if(WEB_APP_URL) syncAllFromCloud(true);
+setInterval(()=> syncAllFromCloud(false), 8000);
 </script>
 </body>
 </html>
